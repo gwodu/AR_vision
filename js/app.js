@@ -4,6 +4,7 @@
   let assertiveness = 50;
   let isARMode = false;
   let placed = false;
+  let dialogueStarted = false;
 
   const $ = (sel) => document.querySelector(sel);
 
@@ -31,7 +32,6 @@
       previewWorld.appendChild(you);
 
       MiiCharacter.setSpeaking(alex, true);
-
       previewWorld.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 16000; easing: linear');
     }
 
@@ -44,19 +44,20 @@
     $('#btn-start-ar').addEventListener('click', () => startExperience(true));
     $('#btn-exit').addEventListener('click', exitExperience);
     $('#btn-restart')?.addEventListener('click', restart);
+    $('#btn-place').addEventListener('click', placeMeeting);
 
     const scene = $('#main-scene');
-    scene.addEventListener('enter-vr', () => {
-      if (isARMode) $('#placement-hint').classList.remove('hidden');
+    scene.addEventListener('surface-found', onSurfaceFound);
+    scene.addEventListener('ar-placed', onARPlaced);
+    scene.addEventListener('ar-ready', () => {
+      if (isARMode) showPlacementUI();
     });
-
-    scene.addEventListener('click', onSceneTap);
-    scene.addEventListener('touchend', onSceneTap);
   }
 
   function startExperience(ar) {
     isARMode = ar;
     placed = !ar;
+    dialogueStarted = !ar;
     currentNode = 'start';
     rapport = 50;
     assertiveness = 50;
@@ -71,8 +72,13 @@
     const scene = $('#main-scene');
     const camera = $('#camera');
 
+    $('#choices-panel').classList.toggle('hidden', ar);
+    $('#placement-hint').classList.toggle('hidden', !ar);
+    $('#btn-place').disabled = true;
+    $('#hint-main').textContent = 'Point your phone at a flat surface';
+    $('#hint-sub').textContent = 'Move slowly until the purple ring appears';
+
     if (ar) {
-      $('#placement-hint').classList.remove('hidden');
       camera.setAttribute('position', '0 1.6 0');
       camera.setAttribute('look-controls', 'enabled: false');
       camera.setAttribute('wasd-controls', 'enabled: false');
@@ -80,36 +86,63 @@
       setTimeout(() => {
         if (scene.enterAR) scene.enterAR();
         else if (scene.enterVR) scene.enterVR();
-      }, 300);
+      }, 400);
     } else {
       $('#placement-hint').classList.add('hidden');
       SceneRenderer.setVisible(true);
       camera.setAttribute('position', '0 1.45 1.6');
       camera.setAttribute('rotation', '-8 0 0');
       camera.setAttribute('look-controls', 'enabled: true');
-      camera.setAttribute('wasd-controls', 'enabled: false');
-      $('#meeting-world').setAttribute('position', '0 0 -1.8');
+      updateMeters();
+      loadNode(currentNode);
     }
 
     window.dispatchEvent(new Event('resize'));
-    updateMeters();
-    loadNode(currentNode);
   }
 
-  function onSceneTap(evt) {
-    if (!isARMode || placed) return;
-    if (evt.target.closest?.('#overlay button, #overlay .choice-btn, #overlay .dialogue-panel')) return;
+  function showPlacementUI() {
+    $('#placement-hint').classList.remove('hidden');
+    $('#choices-panel').classList.add('hidden');
+  }
 
+  function onSurfaceFound() {
+    $('#btn-place').disabled = false;
+    $('#hint-main').textContent = 'Surface detected!';
+    $('#hint-sub').textContent = 'Tap the button below or tap anywhere on screen';
+  }
+
+  function placeMeeting() {
+    const scene = $('#main-scene');
+    const hitTest = scene.components['ar-hit-test'];
+    if (hitTest && hitTest.confirmPlace(true)) return;
+    finalizePlacement();
+  }
+
+  function onARPlaced() {
+    finalizePlacement();
+  }
+
+  function finalizePlacement() {
+    if (placed) return;
     placed = true;
-    $('#placement-hint').classList.add('hidden');
-    SceneRenderer.setVisible(true);
 
-    const anchor = $('#ar-anchor');
-    const pos = anchor.getAttribute('position');
-    $('#meeting-world').setAttribute('position', `${pos.x} ${pos.y} ${pos.z - 0.5}`);
+    $('#placement-hint').classList.add('hidden');
+    $('#ar-reticle').setAttribute('visible', 'false');
+    SceneRenderer.setVisible(true);
+    $('#choices-panel').classList.remove('hidden');
+
+    if (!dialogueStarted) {
+      dialogueStarted = true;
+      updateMeters();
+      loadNode(currentNode);
+    }
   }
 
   function exitExperience() {
+    placed = false;
+    dialogueStarted = false;
+    isARMode = false;
+
     $('#scene-container').classList.remove('active');
     $('#landing').classList.add('active');
     hideEnding();
@@ -117,6 +150,9 @@
     const scene = $('#main-scene');
     if (scene.exitAR) scene.exitAR();
     if (scene.exitVR) scene.exitVR();
+
+    const sky = scene.querySelector('a-sky');
+    if (sky) sky.setAttribute('visible', 'true');
   }
 
   function restart() {
@@ -203,7 +239,6 @@
 
   function hideEnding() {
     $('#ending-panel').classList.add('hidden');
-    $('#choices-panel').classList.remove('hidden');
   }
 
   function updateMeters() {

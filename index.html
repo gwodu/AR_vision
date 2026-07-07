@@ -72,15 +72,35 @@
       id="main-scene"
       renderer="colorManagement: true; antialias: true; alpha: false"
       vr-mode-ui="enabled: false"
-      ar-hit-test="target: #ar-anchor"
+      ar-hit-test="target: #ar-anchor; reticle: #ar-reticle"
       webxr="requiredFeatures: hit-test,local-floor; optionalFeatures: dom-overlay; overlayElement: #overlay"
     >
       <a-sky color="#1a2332"></a-sky>
 
-      <a-entity id="ar-anchor" position="0 0 -2"></a-entity>
+      <a-entity id="ar-anchor" position="0 0 -1.5">
+        <a-entity id="ar-reticle" visible="false">
+          <a-ring
+            radius-inner="0.08"
+            radius-outer="0.1"
+            rotation="-90 0 0"
+            color="#6C5CE7"
+            opacity="0.85"
+            material="shader: flat; transparent: true"
+          ></a-ring>
+          <a-ring
+            radius-inner="0.14"
+            radius-outer="0.145"
+            rotation="-90 0 0"
+            color="#A29BFE"
+            opacity="0.5"
+            material="shader: flat; transparent: true"
+            animation="property: scale; from: 1 1 1; to: 1.15 1.15 1.15; dur: 1200; loop: true; dir: alternate"
+          ></a-ring>
+        </a-entity>
 
-      <a-entity id="meeting-world" visible="false" position="0 0 -1.8">
-        <!-- meeting room built by JS -->
+        <a-entity id="meeting-world" visible="false" position="0 0 0">
+          <!-- meeting room built by JS -->
+        </a-entity>
       </a-entity>
 
       <a-entity light="type: ambient; color: #AAB; intensity: 0.65"></a-entity>
@@ -114,11 +134,12 @@
 
       <div id="placement-hint" class="placement-hint hidden">
         <div class="hint-icon">📱</div>
-        <p>Point your phone at a flat surface</p>
-        <p class="hint-sub">Tap to place the meeting room</p>
+        <p id="hint-main">Point your phone at a flat surface</p>
+        <p id="hint-sub" class="hint-sub">Move slowly until the purple ring appears</p>
+        <button id="btn-place" class="btn-place" disabled>Place Meeting Room</button>
       </div>
 
-      <div id="choices-panel" class="dialogue-panel">
+      <div id="choices-panel" class="dialogue-panel hidden">
         <div id="choices" class="choices"></div>
       </div>
 

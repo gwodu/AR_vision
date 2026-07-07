@@ -289,22 +289,46 @@ html, body {
 
 .placement-hint {
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
+  bottom: 6rem;
+  left: 1rem; right: 1rem;
   text-align: center;
-  background: rgba(26,35,50,0.92);
+  background: rgba(26,35,50,0.94);
   border: 1px solid rgba(108,92,231,0.4);
   border-radius: var(--radius);
-  padding: 1.5rem 2rem;
+  padding: 1.25rem 1.5rem;
   backdrop-filter: blur(12px);
-  animation: pulse 2s ease infinite;
 }
 
 .placement-hint.hidden { display: none; }
 
-.hint-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.hint-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
 .placement-hint p { font-size: 0.95rem; }
-.hint-sub { font-size: 0.8rem !important; color: var(--muted); margin-top: 0.3rem; }
+.hint-sub { font-size: 0.8rem !important; color: var(--muted); margin-top: 0.25rem; margin-bottom: 0.75rem; }
+
+.btn-place {
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  padding: 0.9rem 1.25rem;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.4);
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-place:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-place:not(:disabled):active {
+  transform: scale(0.97);
+}
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -315,6 +339,8 @@ html, body {
   padding: 0 1rem 1.25rem;
   background: linear-gradient(transparent, rgba(15,20,25,0.95) 20%);
 }
+
+.dialogue-panel.hidden { display: none; }
 
 .choices {
   display: flex;
