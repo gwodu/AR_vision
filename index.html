@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>NegotiateAR — Practice Negotiation in 3D</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Landing -->
+  <div id="landing" class="screen active">
+    <div class="landing-content">
+      <header class="hero">
+        <div class="hero-badge">WebAR Demo</div>
+        <h1>Negotiate<span class="accent">AR</span></h1>
+        <p class="hero-sub">Practice real negotiation skills face-to-face with a 3D manager. Choose your words, read the room, close the deal.</p>
+      </header>
+
+      <div class="preview-wrap">
+        <a-scene
+          id="preview-scene"
+          embedded
+          loading-screen="enabled: false"
+          renderer="alpha: true; antialias: true"
+          style="width:100%;height:220px;border-radius:16px;overflow:hidden;"
+        >
+          <a-entity id="preview-world" position="0 0.9 -2.2">
+            <a-entity light="type: ambient; intensity: 0.7"></a-entity>
+            <a-entity light="type: directional; intensity: 0.6" position="1 2 1"></a-entity>
+            <a-plane rotation="-90 0 0" width="4" height="4" color="#2C3E50" material="shader:flat"></a-plane>
+          </a-entity>
+          <a-entity camera position="0 1.1 2.2" look-at="0 0.8 0"></a-entity>
+        </a-scene>
+        <p class="preview-label">↑ Live 3D preview — Wii-style characters</p>
+      </div>
+
+      <div class="scenario-card">
+        <div class="scenario-icon">💼</div>
+        <div>
+          <h2>The Raise</h2>
+          <p>Negotiate your salary with Alex, your manager. 18 months of strong performance — time to make your case.</p>
+        </div>
+      </div>
+
+      <div class="feature-pills">
+        <span>3D Characters</span>
+        <span>Branching Dialogue</span>
+        <span>Rapport Tracking</span>
+        <span>Phone AR</span>
+      </div>
+    </div>
+
+    <div class="launch-bar">
+      <button id="btn-start-3d" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15M21 12l-9 5.15M3 12l9 5.15M21 12V7.5M3 12V7.5M12 2v4.27"/></svg>
+        Start 3D Negotiation
+      </button>
+      <button id="btn-start-ar" class="btn-secondary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        Launch AR on Phone
+      </button>
+    </div>
+  </div>
+
+  <!-- Main 3D / AR Experience -->
+  <div id="scene-container" class="screen">
+    <a-scene
+      id="main-scene"
+      renderer="colorManagement: true; antialias: true; alpha: false"
+      vr-mode-ui="enabled: false"
+      ar-hit-test="target: #ar-anchor"
+      webxr="requiredFeatures: hit-test,local-floor; optionalFeatures: dom-overlay; overlayElement: #overlay"
+    >
+      <a-sky color="#1a2332"></a-sky>
+
+      <a-entity id="ar-anchor" position="0 0 -2"></a-entity>
+
+      <a-entity id="meeting-world" visible="false" position="0 0 -1.8">
+        <!-- meeting room built by JS -->
+      </a-entity>
+
+      <a-entity light="type: ambient; color: #AAB; intensity: 0.65"></a-entity>
+      <a-entity light="type: directional; color: #FFF; intensity: 0.85" position="2 4 2"></a-entity>
+      <a-entity light="type: point; color: #85C1E9; intensity: 0.3" position="0 2 -2"></a-entity>
+
+      <a-camera id="camera" look-controls wasd-controls="enabled: false" position="0 1.45 1.6">
+      </a-camera>
+    </a-scene>
+
+    <div id="overlay">
+      <div class="hud-top">
+        <button id="btn-exit" class="hud-btn" aria-label="Exit">✕</button>
+        <div class="hud-info">
+          <span id="step-label">The Raise</span>
+          <span id="speaker-name">Alex</span>
+          <span id="speaker-role">Your Manager</span>
+        </div>
+      </div>
+
+      <div class="meters">
+        <div class="meter">
+          <label>Rapport <span id="rapport-val">50</span></label>
+          <div class="meter-track"><div id="rapport-bar" class="meter-fill rapport"></div></div>
+        </div>
+        <div class="meter">
+          <label>Assertiveness <span id="assert-val">50</span></label>
+          <div class="meter-track"><div id="assert-bar" class="meter-fill assert"></div></div>
+        </div>
+      </div>
+
+      <div id="placement-hint" class="placement-hint hidden">
+        <div class="hint-icon">📱</div>
+        <p>Point your phone at a flat surface</p>
+        <p class="hint-sub">Tap to place the meeting room</p>
+      </div>
+
+      <div id="choices-panel" class="dialogue-panel">
+        <div id="choices" class="choices"></div>
+      </div>
+
+      <div id="ending-panel" class="ending-panel hidden">
+        <h2 id="ending-title">Deal Closed</h2>
+        <p id="ending-dialogue"></p>
+        <p id="ending-summary"></p>
+        <div class="ending-actions">
+          <button id="btn-restart" class="btn-primary">Try Again</button>
+          <button id="btn-exit-end" class="btn-secondary" onclick="document.getElementById('btn-exit').click()">Exit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="js/ar-hit-test.js"></script>
+  <script src="js/mii-character.js"></script>
+  <script src="js/scenario.js"></script>
+  <script src="js/scene-renderer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

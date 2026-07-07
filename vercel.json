@@ -1,0 +1,11 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Permissions-Policy", "value": "xr-spatial-tracking=*" },
+        { "key": "Feature-Policy", "value": "xr-spatial-tracking *" }
+      ]
+    }
+  ]
+}
