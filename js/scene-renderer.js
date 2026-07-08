@@ -18,7 +18,7 @@ const SceneRenderer = (() => {
     floor.setAttribute('width', 3);
     floor.setAttribute('height', 3);
     floor.setAttribute('rotation', '-90 0 0');
-    floor.setAttribute('color', '#2C3E50');
+    floor.setAttribute('color', '#4A4134');
     floor.setAttribute('material', 'shader: flat');
     room.appendChild(floor);
 
@@ -27,7 +27,7 @@ const SceneRenderer = (() => {
     rug.setAttribute('height', 1.4);
     rug.setAttribute('rotation', '-90 0 0');
     rug.setAttribute('position', '0 0.01 0');
-    rug.setAttribute('color', '#34495E');
+    rug.setAttribute('color', '#5C4F3F');
     rug.setAttribute('material', 'shader: flat');
     room.appendChild(rug);
 
@@ -36,7 +36,7 @@ const SceneRenderer = (() => {
     table.setAttribute('height', 0.06);
     table.setAttribute('depth', 0.7);
     table.setAttribute('position', '0 0.55 0');
-    table.setAttribute('color', '#8B6914');
+    table.setAttribute('color', '#6B5235');
     table.setAttribute('material', 'shader: flat');
     room.appendChild(table);
 
@@ -54,7 +54,7 @@ const SceneRenderer = (() => {
     laptop.setAttribute('height', 0.02);
     laptop.setAttribute('depth', 0.22);
     laptop.setAttribute('position', '0.15 0.59 -0.05');
-    laptop.setAttribute('color', '#BDC3C7');
+    laptop.setAttribute('color', '#5C4F3F');
     laptop.setAttribute('material', 'shader: flat');
     room.appendChild(laptop);
 
@@ -80,8 +80,8 @@ const SceneRenderer = (() => {
     window.setAttribute('width', 1.5);
     window.setAttribute('height', 1);
     window.setAttribute('position', '0 1.2 -1.4');
-    window.setAttribute('color', '#85C1E9');
-    window.setAttribute('material', 'shader: flat; opacity: 0.6; transparent: true');
+    window.setAttribute('color', '#C8B89A');
+    window.setAttribute('material', 'shader: flat; opacity: 0.55; transparent: true');
     room.appendChild(window);
 
     youMii = MiiCharacter.create({ ...CHARACTERS.you, scale: 1 });
@@ -118,7 +118,7 @@ const SceneRenderer = (() => {
     bubbleText.setAttribute('id', 'bubble-text');
     bubbleText.setAttribute('value', '...');
     bubbleText.setAttribute('align', 'center');
-    bubbleText.setAttribute('color', '#2C3E50');
+    bubbleText.setAttribute('color', '#3A362F');
     bubbleText.setAttribute('width', 1);
     bubbleText.setAttribute('wrap-count', 32);
     bubbleText.setAttribute('position', '0 0 0.01');
@@ -180,15 +180,6 @@ const SceneRenderer = (() => {
     MiiCharacter.setMood(youMii, 'happy');
   }
 
-  function setARScale(isAR) {
-    const world = getWorld();
-    if (isAR) {
-      world.setAttribute('scale', '0.35 0.35 0.35');
-    } else {
-      world.setAttribute('scale', '1 1 1');
-    }
-  }
-
   function setVisible(visible) {
     getWorld().setAttribute('visible', visible);
   }
@@ -197,7 +188,6 @@ const SceneRenderer = (() => {
     buildMeetingRoom,
     showDialogue,
     showPlayerChoice,
-    setARScale,
     setVisible,
     getAlex: () => alexMii,
     getYou: () => youMii

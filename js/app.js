@@ -1,204 +1,57 @@
 (() => {
   let currentNode = 'start';
   let rapport = 50;
-  let assertiveness = 50;
-  let isARMode = false;
-  let placed = false;
-  let dialogueStarted = false;
+  let clarity = 50;
 
   const $ = (sel) => document.querySelector(sel);
 
   function init() {
     bindEvents();
-    initPreview();
-    checkARSupport();
-  }
-
-  async function checkARSupport() {
-    const btn = $('#btn-start-ar');
-    if (!btn) return;
-    if (!navigator.xr) {
-      btn.disabled = true;
-      btn.title = 'AR requires WebXR (use Android Chrome)';
-      return;
-    }
-    try {
-      const supported = await navigator.xr.isSessionSupported('immersive-ar');
-      if (!supported) {
-        btn.disabled = true;
-        btn.title = 'AR not supported on this device/browser';
-      }
-    } catch (e) {
-      // leave enabled; enter will fail gracefully
-    }
-  }
-
-  function initPreview() {
-    const preview = document.getElementById('preview-scene');
-    if (!preview) return;
-
-    function populatePreview() {
-      const previewWorld = document.getElementById('preview-world');
-      if (!previewWorld || previewWorld.querySelector('.mii-character')) return;
-
-      const alex = MiiCharacter.create({ ...CHARACTERS.alex, scale: 0.85 });
-      alex.setAttribute('position', '-0.4 0 0');
-      alex.setAttribute('rotation', '0 25 0');
-      previewWorld.appendChild(alex);
-
-      const you = MiiCharacter.create({ ...CHARACTERS.you, scale: 0.85 });
-      you.setAttribute('position', '0.4 0 0');
-      you.setAttribute('rotation', '0 -25 0');
-      previewWorld.appendChild(you);
-
-      MiiCharacter.setSpeaking(alex, true);
-      previewWorld.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 16000; easing: linear');
-    }
-
-    if (preview.hasLoaded) populatePreview();
-    else preview.addEventListener('loaded', populatePreview);
   }
 
   function bindEvents() {
-    $('#btn-start-3d').addEventListener('click', () => startExperience(false));
-    $('#btn-start-ar').addEventListener('click', handleStartAR);
-    $('#btn-exit').addEventListener('click', exitExperience);
+    $('#btn-start').addEventListener('click', start);
+    $('#btn-exit').addEventListener('click', exit);
     $('#btn-restart')?.addEventListener('click', restart);
-    $('#btn-place').addEventListener('click', placeMeeting);
-
-    const scene = $('#main-scene');
-    scene.addEventListener('surface-found', onSurfaceFound);
-    scene.addEventListener('ar-placed', onARPlaced);
-    scene.addEventListener('ar-ready', () => {
-      if (isARMode) showPlacementUI();
-    });
   }
 
-  async function handleStartAR() {
-    const btn = $('#btn-start-ar');
-    // Quick support re-check (fast, non-interactive query)
-    if (navigator.xr) {
-      try {
-        const supported = await navigator.xr.isSessionSupported('immersive-ar');
-        if (!supported) {
-          alert('Immersive AR not supported here. Please use "Start 3D Negotiation" or try on Android Chrome with ARCore enabled.');
-          if (btn) btn.disabled = true;
-          return;
-        }
-      } catch (e) {}
-    }
-    startExperience(true);
-  }
-
-  function startExperience(ar) {
-    isARMode = ar;
-    placed = !ar;
-    dialogueStarted = !ar;
-    currentNode = 'start';
-    rapport = 50;
-    assertiveness = 50;
-
+  function start() {
     $('#landing').classList.remove('active');
     $('#scene-container').classList.add('active');
 
     SceneRenderer.buildMeetingRoom();
-    SceneRenderer.setARScale(ar);
-    SceneRenderer.setVisible(!ar);
+    SceneRenderer.setVisible(true);
 
-    const scene = $('#main-scene');
     const camera = $('#camera');
+    camera.setAttribute('position', '0 1.45 1.6');
+    camera.setAttribute('rotation', '-8 0 0');
+    camera.setAttribute('look-controls', 'enabled: true');
 
-    $('#choices-panel').classList.toggle('hidden', ar);
-    $('#placement-hint').classList.toggle('hidden', !ar);
-    $('#btn-place').disabled = true;
-    $('#hint-main').textContent = 'Point your phone at a flat surface';
-    $('#hint-sub').textContent = 'Move slowly until the purple ring appears';
+    rapport = 50;
+    clarity = 50;
+    currentNode = 'start';
 
-    if (ar) {
-      camera.setAttribute('position', '0 1.6 0');
-      camera.setAttribute('look-controls', 'enabled: false');
-      camera.setAttribute('wasd-controls', 'enabled: false');
-
-      // Call enterAR synchronously from the user gesture (after fast support check)
-      // so the browser can prompt for camera permission and start immersive-ar session.
-      if (scene.enterAR) {
-        scene.enterAR();
-      } else if (scene.enterVR) {
-        scene.enterVR();
-      }
-    } else {
-      $('#placement-hint').classList.add('hidden');
-      SceneRenderer.setVisible(true);
-      camera.setAttribute('position', '0 1.45 1.6');
-      camera.setAttribute('rotation', '-8 0 0');
-      camera.setAttribute('look-controls', 'enabled: true');
-      updateMeters();
-      loadNode(currentNode);
-    }
+    updateMeters();
+    loadNode(currentNode);
 
     window.dispatchEvent(new Event('resize'));
   }
 
-  function showPlacementUI() {
-    $('#placement-hint').classList.remove('hidden');
-    $('#choices-panel').classList.add('hidden');
-  }
-
-  function onSurfaceFound() {
-    $('#btn-place').disabled = false;
-    $('#hint-main').textContent = 'Surface detected!';
-    $('#hint-sub').textContent = 'Tap the button below or tap anywhere on screen';
-  }
-
-  function placeMeeting() {
-    const scene = $('#main-scene');
-    const hitTest = scene.components['ar-placement'];
-    if (hitTest && hitTest.confirmPlace(true)) return;
-    finalizePlacement();
-  }
-
-  function onARPlaced() {
-    finalizePlacement();
-  }
-
-  function finalizePlacement() {
-    if (placed) return;
-    placed = true;
-
-    $('#placement-hint').classList.add('hidden');
-    $('#ar-reticle').setAttribute('visible', 'false');
-    SceneRenderer.setVisible(true);
-    $('#choices-panel').classList.remove('hidden');
-
-    if (!dialogueStarted) {
-      dialogueStarted = true;
-      updateMeters();
-      loadNode(currentNode);
-    }
-  }
-
-  function exitExperience() {
-    placed = false;
-    dialogueStarted = false;
-    isARMode = false;
-
+  function exit() {
     $('#scene-container').classList.remove('active');
     $('#landing').classList.add('active');
     hideEnding();
 
-    const scene = $('#main-scene');
-    if (scene.exitAR) scene.exitAR();
-    if (scene.exitVR) scene.exitVR();
-
-    const sky = scene.querySelector('a-sky');
-    if (sky) sky.setAttribute('visible', 'true');
+    // reset camera just in case
+    const camera = $('#camera');
+    camera.setAttribute('look-controls', 'enabled: false');
   }
 
   function restart() {
     hideEnding();
     currentNode = 'start';
     rapport = 50;
-    assertiveness = 50;
+    clarity = 50;
     updateMeters();
     loadNode('start');
   }
@@ -241,7 +94,7 @@
 
   function pickChoice(choice) {
     rapport = clamp(rapport + (choice.rapport || 0) * 3, 0, 100);
-    assertiveness = clamp(assertiveness + (choice.assert || 0) * 3, 0, 100);
+    clarity = clamp(clarity + (choice.assert || 0) * 3, 0, 100);
 
     SceneRenderer.showPlayerChoice(choice.text);
 
@@ -257,20 +110,20 @@
     $('#ending-panel').classList.remove('hidden');
 
     const titles = {
-      great: 'Negotiation Master',
-      good: 'Deal Closed',
-      ok: 'Partial Win',
-      walked: 'Walked Away'
+      great: 'Well done',
+      good: 'A good step',
+      ok: 'Progress',
+      walked: 'You walked away'
     };
     const colors = {
-      great: '#27AE60',
-      good: '#4A90D9',
-      ok: '#F39C12',
-      walked: '#E74C3C'
+      great: '#7A8A6F',
+      good: '#8B6642',
+      ok: '#A89B7E',
+      walked: '#6B665C'
     };
 
     $('#ending-title').textContent = titles[node.outcome] || 'Complete';
-    $('#ending-title').style.color = colors[node.outcome] || '#fff';
+    $('#ending-title').style.color = colors[node.outcome] || '#F8F5F0';
     $('#ending-summary').textContent = node.summary;
     $('#ending-dialogue').textContent = node.text;
     updateMeters();
@@ -282,9 +135,9 @@
 
   function updateMeters() {
     $('#rapport-bar').style.width = `${rapport}%`;
-    $('#assert-bar').style.width = `${assertiveness}%`;
+    $('#assert-bar').style.width = `${clarity}%`;
     $('#rapport-val').textContent = rapport;
-    $('#assert-val').textContent = assertiveness;
+    $('#assert-val').textContent = clarity;
   }
 
   function clamp(v, min, max) {
