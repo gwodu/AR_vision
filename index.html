@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+  <script src="js/ar-hit-test.js"></script>
 </head>
 <body>
   <!-- Landing -->
@@ -72,7 +74,7 @@
       id="main-scene"
       renderer="colorManagement: true; antialias: true; alpha: false"
       vr-mode-ui="enabled: false"
-      ar-hit-test="target: #ar-anchor; reticle: #ar-reticle"
+      ar-placement="target: #ar-anchor; reticle: #ar-reticle"
       webxr="requiredFeatures: hit-test,local-floor; optionalFeatures: dom-overlay; overlayElement: #overlay"
     >
       <a-sky color="#1a2332"></a-sky>
@@ -155,8 +157,6 @@
     </div>
   </div>
 
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="js/ar-hit-test.js"></script>
   <script src="js/mii-character.js"></script>
   <script src="js/scenario.js"></script>
   <script src="js/scene-renderer.js"></script>

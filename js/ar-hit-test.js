@@ -1,4 +1,4 @@
-AFRAME.registerComponent('ar-hit-test', {
+AFRAME.registerComponent('ar-placement', {
   schema: {
     target: { type: 'selector' },
     reticle: { type: 'selector' }
@@ -122,9 +122,14 @@ AFRAME.registerComponent('ar-hit-test', {
     );
 
     if (!this.lastPose) {
+      const T = window.THREE || (typeof AFRAME !== 'undefined' && AFRAME.THREE);
+      if (!T) {
+        console.warn('THREE not available yet for AR hit-test pose tracking');
+        return;
+      }
       this.lastPose = {
-        position: new THREE.Vector3(),
-        quaternion: new THREE.Quaternion()
+        position: new T.Vector3(),
+        quaternion: new T.Quaternion()
       };
     }
     this.lastPose.position.copy(t.position);

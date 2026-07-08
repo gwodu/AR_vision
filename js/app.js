@@ -11,6 +11,26 @@
   function init() {
     bindEvents();
     initPreview();
+    checkARSupport();
+  }
+
+  async function checkARSupport() {
+    const btn = $('#btn-start-ar');
+    if (!btn) return;
+    if (!navigator.xr) {
+      btn.disabled = true;
+      btn.title = 'AR requires WebXR (use Android Chrome)';
+      return;
+    }
+    try {
+      const supported = await navigator.xr.isSessionSupported('immersive-ar');
+      if (!supported) {
+        btn.disabled = true;
+        btn.title = 'AR not supported on this device/browser';
+      }
+    } catch (e) {
+      // leave enabled; enter will fail gracefully
+    }
   }
 
   function initPreview() {
@@ -41,7 +61,7 @@
 
   function bindEvents() {
     $('#btn-start-3d').addEventListener('click', () => startExperience(false));
-    $('#btn-start-ar').addEventListener('click', () => startExperience(true));
+    $('#btn-start-ar').addEventListener('click', handleStartAR);
     $('#btn-exit').addEventListener('click', exitExperience);
     $('#btn-restart')?.addEventListener('click', restart);
     $('#btn-place').addEventListener('click', placeMeeting);
@@ -52,6 +72,22 @@
     scene.addEventListener('ar-ready', () => {
       if (isARMode) showPlacementUI();
     });
+  }
+
+  async function handleStartAR() {
+    const btn = $('#btn-start-ar');
+    // Quick support re-check (fast, non-interactive query)
+    if (navigator.xr) {
+      try {
+        const supported = await navigator.xr.isSessionSupported('immersive-ar');
+        if (!supported) {
+          alert('Immersive AR not supported here. Please use "Start 3D Negotiation" or try on Android Chrome with ARCore enabled.');
+          if (btn) btn.disabled = true;
+          return;
+        }
+      } catch (e) {}
+    }
+    startExperience(true);
   }
 
   function startExperience(ar) {
@@ -83,10 +119,13 @@
       camera.setAttribute('look-controls', 'enabled: false');
       camera.setAttribute('wasd-controls', 'enabled: false');
 
-      setTimeout(() => {
-        if (scene.enterAR) scene.enterAR();
-        else if (scene.enterVR) scene.enterVR();
-      }, 400);
+      // Call enterAR synchronously from the user gesture (after fast support check)
+      // so the browser can prompt for camera permission and start immersive-ar session.
+      if (scene.enterAR) {
+        scene.enterAR();
+      } else if (scene.enterVR) {
+        scene.enterVR();
+      }
     } else {
       $('#placement-hint').classList.add('hidden');
       SceneRenderer.setVisible(true);
@@ -113,7 +152,7 @@
 
   function placeMeeting() {
     const scene = $('#main-scene');
-    const hitTest = scene.components['ar-hit-test'];
+    const hitTest = scene.components['ar-placement'];
     if (hitTest && hitTest.confirmPlace(true)) return;
     finalizePlacement();
   }
