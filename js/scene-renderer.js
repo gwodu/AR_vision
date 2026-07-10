@@ -83,19 +83,50 @@ const SceneRenderer = (() => {
     window.setAttribute('material', 'shader: flat; opacity: 0.55; transparent: true');
     room.appendChild(window);
 
-    // You can import real human models like this:
-    // youMii = MiiCharacter.create({ ...CHARACTERS.you, scale: 1, model: 'models/you.glb' });
-    // First-person: only show Alex (the manager). Player is implied at the table.
-    // alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1, model: 'models/alex.glb' });
-    alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 0.85 });
-    // Position Alex to the right side of the table from first-person view
+    // === REAL HUMAN MODEL (recommended) ===
+    // WebAR/WebXR has NO limitation to "simple building blocks".
+    // A-Frame fully supports importing proper 3D models via glTF/GLB (the standard for web 3D).
+    // The current look (cubes/cylinders/spheres) is only because we're building it procedurally in mii-character.js.
+    //
+    // To get a real connected human:
+    // 1. Download a low-poly glTF/GLB character (very important for mobile/WebXR performance — aim for < 5k-10k triangles).
+    //    Good free sources:
+    //    - https://poly.pizza/ (search "low poly man" or "character", direct GLTF downloads)
+    //    - Sketchfab (filter "downloadable" + "low poly" + "CC0" or free)
+    //    - Quaternius low-poly packs (many free CC0 animated humans)
+    // 2. Put the file in a `models/` folder as `models/alex.glb`
+    // 3. Replace the creation below with:
+    //
+    // alexMii = document.createElement('a-entity');
+    // alexMii.setAttribute('gltf-model', 'models/alex.glb');
+    // alexMii.setAttribute('scale', '0.85 0.85 0.85');
+    // alexMii.setAttribute('position', '0.8 0 -0.6');
+    // alexMii.setAttribute('rotation', '0 -30 0');
+    // room.appendChild(alexMii);
+    //
+    // With a proper model the mesh will be connected (no floating hands), and it will look like a real person.
+
+    // Load the Business Man model you linked: https://poly.pizza/m/JFrLIKqvCH
+    // Download the GLTF (or GLB if available), put the file(s) in a `models/` folder.
+    // Rename the main file to business-man.glb for simplicity (or update the path below).
+    // This gives a proper low-poly connected human mesh instead of primitives.
+    alexMii = document.createElement('a-entity');
+    alexMii.setAttribute('gltf-model', 'models/business-man.glb');
+    alexMii.setAttribute('scale', '0.85 0.85 0.85');
+    // Right side of the table in first-person
     alexMii.setAttribute('position', '0.8 0 -0.6');
     alexMii.setAttribute('rotation', '0 -30 0');
     room.appendChild(alexMii);
 
+    // Fallback if model not loaded (procedural):
+    // alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 0.85 });
+    // alexMii.setAttribute('position', '0.8 0 -0.6');
+    // alexMii.setAttribute('rotation', '0 -30 0');
+    // room.appendChild(alexMii);
+
     const speechBubble = document.createElement('a-entity');
     speechBubble.setAttribute('id', 'speech-bubble');
-    speechBubble.setAttribute('position', '0 1.15 -0.55');
+    speechBubble.setAttribute('position', '0.8 1.25 -0.4');
 
     const bubbleBg = document.createElement('a-plane');
     bubbleBg.setAttribute('width', 1.1);
@@ -154,11 +185,22 @@ const SceneRenderer = (() => {
       bubble.setAttribute('position', '0.8 1.25 -0.4');
       bubble.setAttribute('visible', 'true');
       MiiCharacter.setSpeaking(alexMii, true);
+
+      // Simple talking animation for the glTF model (head nod)
+      if (alexMii && alexMii.getAttribute('gltf-model')) {
+        alexMii.removeAttribute('animation__talk');
+        alexMii.setAttribute('animation__talk', 'property: rotation; dur: 350; dir: alternate; loop: true; to: -27 -27 2; easing: easeInOutSine');
+      }
+
       MiiCharacter.setMood(alexMii, node.mood || 'neutral');
     } else {
       // Player (first-person) - bubble on the near side
       bubble.setAttribute('position', '0 1.15 0.4');
       MiiCharacter.setSpeaking(alexMii, false);
+
+      if (alexMii && alexMii.getAttribute('gltf-model')) {
+        alexMii.removeAttribute('animation__talk');
+      }
     }
 
     if (bubble) {
@@ -177,6 +219,10 @@ const SceneRenderer = (() => {
     if (speakerName) speakerName.textContent = 'You';
     if (speakerRole) speakerRole.textContent = '';
     MiiCharacter.setSpeaking(alexMii, false);
+
+    if (alexMii && alexMii.getAttribute('gltf-model')) {
+      alexMii.removeAttribute('animation__talk');
+    }
   }
 
   function setVisible(visible) {

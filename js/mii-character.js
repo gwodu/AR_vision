@@ -9,9 +9,9 @@ const MiiCharacter = (() => {
   function createHand(skin, isLeft = false) {
     const group = document.createElement('a-entity');
 
-    // palm (the circular ball should be "above" / closer to the arm than the fingers)
+    // palm — positioned to sit flush against the wrist/arm end
     const palm = part('a-sphere', {
-      radius: 0.029, color: skin, position: '0 0.015 0'
+      radius: 0.032, color: skin, position: '0 0.0 0'
     });
     group.appendChild(palm);
 
@@ -54,10 +54,11 @@ const MiiCharacter = (() => {
       hairStyle = 'short',
       scale = 1,
       name = 'Character',
-      model = null   // e.g. 'models/person.glb' for better human model
+      model = null   // set to 'models/alex.glb' etc. for a real glTF model (see scene-renderer.js)
     } = config;
 
     // Support importing real glTF / GLB human models
+    // (this is the proper way — no limitation in WebAR/WebXR)
     if (model) {
       const modelEntity = document.createElement('a-entity');
       modelEntity.setAttribute('gltf-model', model);
@@ -115,8 +116,16 @@ const MiiCharacter = (() => {
     leftArm.setAttribute('id', 'left-arm');
     body.appendChild(leftArm);
 
+    // Wrist connector (makes the hand look attached to the arm)
+    const leftWrist = part('a-cylinder', {
+      radius: 0.035, height: 0.06, color: skin,
+      position: '-0.20 0.55 0'
+    });
+    body.appendChild(leftWrist);
+
     const leftHand = createHand(skin, true);
-    leftHand.setAttribute('position', '-0.32 0.55 0');
+    // Position so the palm sits right at the end of the wrist/arm (connected look)
+    leftHand.setAttribute('position', '-0.20 0.52 0');
     leftHand.setAttribute('id', 'left-hand');
     body.appendChild(leftHand);
 
@@ -127,8 +136,14 @@ const MiiCharacter = (() => {
     rightArm.setAttribute('id', 'right-arm');
     body.appendChild(rightArm);
 
+    const rightWrist = part('a-cylinder', {
+      radius: 0.035, height: 0.06, color: skin,
+      position: '0.20 0.55 0'
+    });
+    body.appendChild(rightWrist);
+
     const rightHand = createHand(skin, false);
-    rightHand.setAttribute('position', '0.32 0.55 0');
+    rightHand.setAttribute('position', '0.20 0.52 0');
     rightHand.setAttribute('id', 'right-hand');
     body.appendChild(rightHand);
 

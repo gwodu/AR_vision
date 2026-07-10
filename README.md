@@ -76,26 +76,25 @@ AR_vision/
 - Optional: real glTF/GLB human models (see js/mii-character.js and js/scenario.js)
 - Static site — no build step
 
-## Using better human models
+## Using better human models (recommended)
 
-The current characters are built from basic shapes for performance and simplicity in WebAR.
+**WebAR/WebXR is NOT limited to simple building blocks.**
 
-You can replace them with proper human models:
+A-Frame fully supports real 3D models using the glTF/GLB format (the standard for the web). The current characters look like "a bunch of cubes, circles and cylinders" only because we are building them procedurally with A-Frame primitives (`<a-box>`, `<a-sphere>`, `<a-cylinder>`) for zero-asset simplicity and easy custom animation.
 
-1. Download a .glb (glTF binary) file (low-poly recommended for mobile).
-2. Put it in a `models/` folder (e.g. `models/you.glb`).
-3. In `js/scenario.js`, uncomment and set the `model` property on the character:
-   ```js
-   you: {
-     ...
-     model: 'models/you.glb'
-   }
-   ```
-4. The model will be loaded via A-Frame's gltf-model.
+### How to use a real connected human model
+1. Go to the link: https://poly.pizza/m/JFrLIKqvCH (Business Man by Quaternius)
+2. Click Download → choose GLTF (or GLB if offered). If it's a zip, extract.
+3. Put the main model file in `models/business-man.glb` (rename if needed; if separate .gltf + .bin, put the whole folder contents in models/ and use 'models/business-man.gltf')
+4. The code in `js/scene-renderer.js` already loads it by default. Refresh.
 
-Good free sources:
-- Sketchfab (search "human gltf", filter license)
-- Mixamo (rigged characters)
-- Kenney or other free asset sites
+This replaces the primitive blocks with a proper low-poly connected mesh. Hands will be attached, looks like a real person.
 
-Note: Complex models can impact performance on phones in AR. Procedural shapes are often the "best" choice for reliable WebAR experiences.
+Good free sources for low-poly humans:
+- Poly Pizza (https://poly.pizza/ — direct GLTF downloads, very low poly)
+- Sketchfab (search "low poly man gltf" or "lowpoly character", filter downloadable + free license)
+- Quaternius packs (CC0, many low-poly + animated humans)
+
+Note: For WebXR on phones, always prioritize small optimized models over high-detail ones. Procedural is "good enough" when you want zero downloads, but a proper glTF will look like an actual person with connected hands/mesh.
+
+The code already supports both (see `model:` option and the glTF example in scene-renderer.js).
