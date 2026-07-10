@@ -60,22 +60,22 @@
 
       // Make sure context is running (required after user gesture)
       const startPlaying = () => {
-        // A short primer note to unlock audio on some browsers
-        playNote(880, 0.0, 0.08, 'sine', 0.3);
+        // A short loud primer note to reliably unlock audio
+        playNote(1046, 0.0, 0.06, 'sine', 0.6);
 
-        // Main fun upbeat jingle (higher volume)
-        playNote(523.25, 0.12, 0.18, 'triangle', 0.55); // C5
-        playNote(659.25, 0.30, 0.18, 'triangle', 0.55); // E5
-        playNote(783.99, 0.48, 0.18, 'triangle', 0.55); // G5
-        playNote(1046.50, 0.66, 0.38, 'triangle', 0.65); // C6
+        // Main fun upbeat jingle - much louder now
+        playNote(523.25, 0.10, 0.20, 'triangle', 0.7); // C5
+        playNote(659.25, 0.28, 0.20, 'triangle', 0.7); // E5
+        playNote(783.99, 0.46, 0.20, 'triangle', 0.7); // G5
+        playNote(1046.50, 0.64, 0.40, 'triangle', 0.8); // C6
 
-        playNote(880.00, 1.12, 0.15, 'triangle', 0.5);  // A5
-        playNote(987.77, 1.27, 0.15, 'triangle', 0.5);  // B5
-        playNote(1046.50, 1.43, 0.45, 'triangle', 0.6); // C6
+        playNote(880.00, 1.10, 0.16, 'triangle', 0.65);  // A5
+        playNote(987.77, 1.25, 0.16, 'triangle', 0.65);  // B5
+        playNote(1046.50, 1.40, 0.50, 'triangle', 0.75); // C6
 
-        // Bass line for fullness
-        playNote(261.63, 0.10, 0.6, 'sine', 0.28);  // C4
-        playNote(392.00, 0.75, 0.5, 'sine', 0.25);  // G4
+        // Bass line
+        playNote(261.63, 0.08, 0.65, 'sine', 0.4);  // C4
+        playNote(392.00, 0.72, 0.55, 'sine', 0.35);  // G4
       };
 
       if (ctx.state === 'suspended') {
