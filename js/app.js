@@ -174,6 +174,24 @@
     rapport = clamp(rapport + (choice.rapport || 0) * 3, 0, 100);
     clarity = clamp(clarity + (choice.assert || 0) * 3, 0, 100);
 
+    // subtle click sound for feedback
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const c = new AudioCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = 'sine';
+        o.frequency.value = 1200;
+        g.gain.value = 0.2;
+        o.connect(g);
+        g.connect(c.destination);
+        o.start();
+        g.gain.linearRampToValueAtTime(0.001, c.currentTime + 0.12);
+        setTimeout(() => o.stop(), 200);
+      }
+    } catch(e){}
+
     SceneRenderer.showPlayerChoice(choice.text);
 
     setTimeout(() => {
