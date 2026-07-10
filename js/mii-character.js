@@ -84,50 +84,114 @@ const MiiCharacter = (() => {
     root.setAttribute('scale', `${scale} ${scale} ${scale}`);
 
     const body = document.createElement('a-entity');
-    body.setAttribute('position', '0 0.55 0');
+    body.setAttribute('position', '0 0 0');  // standing on ground
 
+    // Full torso (taller, more human proportions)
     const torso = part('a-box', {
-      width: 0.22, height: 0.26, depth: 0.14,
-      color: shirt, position: '0 0.13 0'
+      width: 0.28, height: 0.55, depth: 0.18,
+      color: shirt, position: '0 0.85 0'
     });
     body.appendChild(torso);
 
-    // Simple collar detail for more clothing realism
-    const collar = part('a-box', {
-      width: 0.23, height: 0.04, depth: 0.15,
-      color: '#2c2c2c', position: '0 0.26 0'
+    // Jacket/collar detail
+    const jacket = part('a-box', {
+      width: 0.30, height: 0.52, depth: 0.19,
+      color: '#3a3a3a', position: '0 0.85 0'
     });
-    body.appendChild(collar);
+    body.appendChild(jacket);
 
-    const leftArm = part('a-cylinder', {
-      radius: 0.035, height: 0.2, color: shirt,
-      position: '-0.16 0.18 0', rotation: '0 0 15'
+    // Simple tie
+    const tie = part('a-box', {
+      width: 0.04, height: 0.35, depth: 0.02,
+      color: '#1a1a1a', position: '0 0.75 0.1'
     });
-    leftArm.setAttribute('id', 'left-arm');
-    body.appendChild(leftArm);
+    body.appendChild(tie);
 
-    const rightArm = part('a-cylinder', {
-      radius: 0.035, height: 0.2, color: shirt,
-      position: '0.16 0.18 0', rotation: '0 0 -15'
+    // Full arms with elbows (upper + forearm)
+    // Left upper arm
+    const leftUpperArm = part('a-cylinder', {
+      radius: 0.04, height: 0.28, color: shirt,
+      position: '-0.18 1.05 0', rotation: '0 0 25'
     });
-    rightArm.setAttribute('id', 'right-arm');
-    body.appendChild(rightArm);
+    leftUpperArm.setAttribute('id', 'left-upper-arm');
+    body.appendChild(leftUpperArm);
+
+    // Left forearm
+    const leftForearm = part('a-cylinder', {
+      radius: 0.035, height: 0.26, color: shirt,
+      position: '-0.26 0.78 0', rotation: '0 0 10'
+    });
+    leftForearm.setAttribute('id', 'left-forearm');
+    body.appendChild(leftForearm);
 
     const leftHand = createHand(skin, true);
-    leftHand.setAttribute('position', '-0.195 0.06 0');
+    leftHand.setAttribute('position', '-0.30 0.55 0');
     leftHand.setAttribute('id', 'left-hand');
-    // subtle idle movement on hands (appendages)
-    leftHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2100; loop: true; to: 0 0 6; easing: easeInOutSine');
+    leftHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2100; loop: true; to: 0 0 8; easing: easeInOutSine');
     body.appendChild(leftHand);
 
+    // Right upper arm
+    const rightUpperArm = part('a-cylinder', {
+      radius: 0.04, height: 0.28, color: shirt,
+      position: '0.18 1.05 0', rotation: '0 0 -25'
+    });
+    rightUpperArm.setAttribute('id', 'right-upper-arm');
+    body.appendChild(rightUpperArm);
+
+    // Right forearm
+    const rightForearm = part('a-cylinder', {
+      radius: 0.035, height: 0.26, color: shirt,
+      position: '0.26 0.78 0', rotation: '0 0 -10'
+    });
+    rightForearm.setAttribute('id', 'right-forearm');
+    body.appendChild(rightForearm);
+
     const rightHand = createHand(skin, false);
-    rightHand.setAttribute('position', '0.195 0.06 0');
+    rightHand.setAttribute('position', '0.30 0.55 0');
     rightHand.setAttribute('id', 'right-hand');
-    rightHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2400; loop: true; to: 0 0 -7; easing: easeInOutSine');
+    rightHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2400; loop: true; to: 0 0 -8; easing: easeInOutSine');
     body.appendChild(rightHand);
 
+    // Full legs
+    const leftUpperLeg = part('a-cylinder', {
+      radius: 0.05, height: 0.32, color: pants,
+      position: '-0.09 0.42 0'
+    });
+    body.appendChild(leftUpperLeg);
+
+    const leftLowerLeg = part('a-cylinder', {
+      radius: 0.045, height: 0.32, color: pants,
+      position: '-0.09 0.12 0'
+    });
+    body.appendChild(leftLowerLeg);
+
+    const rightUpperLeg = part('a-cylinder', {
+      radius: 0.05, height: 0.32, color: pants,
+      position: '0.09 0.42 0'
+    });
+    body.appendChild(rightUpperLeg);
+
+    const rightLowerLeg = part('a-cylinder', {
+      radius: 0.045, height: 0.32, color: pants,
+      position: '0.09 0.12 0'
+    });
+    body.appendChild(rightLowerLeg);
+
+    // Shoes
+    const leftShoe = part('a-box', {
+      width: 0.09, height: 0.06, depth: 0.16,
+      color: '#222222', position: '-0.09 0.0 0.04'
+    });
+    body.appendChild(leftShoe);
+
+    const rightShoe = part('a-box', {
+      width: 0.09, height: 0.06, depth: 0.16,
+      color: '#222222', position: '0.09 0.0 0.04'
+    });
+    body.appendChild(rightShoe);
+
     const headGroup = document.createElement('a-entity');
-    headGroup.setAttribute('position', '0 0.38 0');
+    headGroup.setAttribute('position', '0 1.28 0');
     headGroup.setAttribute('id', 'head-group');
 
     const head = part('a-sphere', {
@@ -234,29 +298,6 @@ const MiiCharacter = (() => {
 
     body.appendChild(headGroup);
 
-    const leftLeg = part('a-cylinder', {
-      radius: 0.045, height: 0.22, color: pants,
-      position: '-0.07 -0.12 0'
-    });
-    body.appendChild(leftLeg);
-
-    const rightLeg = part('a-cylinder', {
-      radius: 0.045, height: 0.22, color: pants,
-      position: '0.07 -0.12 0'
-    });
-    body.appendChild(rightLeg);
-
-    const leftShoe = part('a-box', {
-      width: 0.08, height: 0.04, depth: 0.12,
-      color: '#FFFFFF', position: '-0.07 -0.25 0.02'
-    });
-    const rightShoe = part('a-box', {
-      width: 0.08, height: 0.04, depth: 0.12,
-      color: '#FFFFFF', position: '0.07 -0.25 0.02'
-    });
-    body.appendChild(leftShoe);
-    body.appendChild(rightShoe);
-
     root.appendChild(body);
 
     root.setAttribute('animation__idle', 'property: position; dir: alternate; dur: 1800; loop: true; to: 0 0.02 0; easing: easeInOutSine');
@@ -269,7 +310,7 @@ const MiiCharacter = (() => {
     nameTag.setAttribute('align', 'center');
     nameTag.setAttribute('color', '#ffffff');
     nameTag.setAttribute('width', 1.2);
-    nameTag.setAttribute('position', '0 0.95 0');
+    nameTag.setAttribute('position', '0 1.85 0');
     nameTag.setAttribute('scale', '0.5 0.5 0.5');
     root.appendChild(nameTag);
 
@@ -318,13 +359,22 @@ const MiiCharacter = (() => {
         mouth.setAttribute('animation__talk', 'property: scale; dir: alternate; dur: 280; loop: true; to: 1.2 1.7 1');
       }
       // More natural gesturing - right hand more active
-      const rightArm = character.querySelector('#right-arm');
-      if (rightArm) {
-        rightArm.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 480; loop: true; to: 5 0 -45');
+      // Animate upper arms and forearms for more natural human movement
+      const rightUpper = character.querySelector('#right-upper-arm');
+      if (rightUpper) {
+        rightUpper.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 480; loop: true; to: 8 0 -50');
       }
-      const leftArm = character.querySelector('#left-arm');
-      if (leftArm) {
-        leftArm.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 720; loop: true; to: -3 0 18');
+      const rightFore = character.querySelector('#right-forearm');
+      if (rightFore) {
+        rightFore.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 420; loop: true; to: -5 0 -25');
+      }
+      const leftUpper = character.querySelector('#left-upper-arm');
+      if (leftUpper) {
+        leftUpper.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 720; loop: true; to: -5 0 22');
+      }
+      const leftFore = character.querySelector('#left-forearm');
+      if (leftFore) {
+        leftFore.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 650; loop: true; to: 4 0 15');
       }
 
       // moving fingers + hand lift = more human appendages!
@@ -340,10 +390,14 @@ const MiiCharacter = (() => {
     } else {
       head.removeAttribute('animation__talk');
       if (mouth) mouth.removeAttribute('animation__talk');
-      const rightArm = character.querySelector('#right-arm');
-      if (rightArm) rightArm.removeAttribute('animation__gesture');
-      const leftArm = character.querySelector('#left-arm');
-      if (leftArm) leftArm.removeAttribute('animation__gesture');
+      const rightUpper = character.querySelector('#right-upper-arm');
+      if (rightUpper) rightUpper.removeAttribute('animation__gesture');
+      const rightFore = character.querySelector('#right-forearm');
+      if (rightFore) rightFore.removeAttribute('animation__gesture');
+      const leftUpper = character.querySelector('#left-upper-arm');
+      if (leftUpper) leftUpper.removeAttribute('animation__gesture');
+      const leftFore = character.querySelector('#left-forearm');
+      if (leftFore) leftFore.removeAttribute('animation__gesture');
 
       const hand = character.querySelector('#right-hand');
       if (hand) hand.removeAttribute('animation__hand');

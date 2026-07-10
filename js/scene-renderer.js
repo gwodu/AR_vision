@@ -1,5 +1,4 @@
 const SceneRenderer = (() => {
-  let youMii = null;
   let alexMii = null;
   let meetingWorld = null;
 
@@ -86,15 +85,10 @@ const SceneRenderer = (() => {
 
     // You can import real human models like this:
     // youMii = MiiCharacter.create({ ...CHARACTERS.you, scale: 1, model: 'models/you.glb' });
-    youMii = MiiCharacter.create({ ...CHARACTERS.you, scale: 1 });
-    youMii.setAttribute('position', '0 0 0.55');
-    youMii.setAttribute('rotation', '0 180 0');
-    room.appendChild(youMii);
-    MiiCharacter.startBlinking(youMii);
-
+    // First-person: only show Alex (the manager). Player is implied at the table.
     // alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1, model: 'models/alex.glb' });
-    alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1 });
-    alexMii.setAttribute('position', '0 0 -0.55');
+    alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1.1 });
+    alexMii.setAttribute('position', '0 0 -1.2');
     alexMii.setAttribute('rotation', '0 0 0');
     room.appendChild(alexMii);
     MiiCharacter.startBlinking(alexMii);
@@ -157,15 +151,13 @@ const SceneRenderer = (() => {
     }
 
     if (speaker === 'alex') {
-      bubble.setAttribute('position', '0 1.15 -0.55');
+      bubble.setAttribute('position', '0 1.35 -1.0');
       bubble.setAttribute('visible', 'true');
       MiiCharacter.setSpeaking(alexMii, true);
-      MiiCharacter.setSpeaking(youMii, false);
       MiiCharacter.setMood(alexMii, node.mood || 'neutral');
-      MiiCharacter.setMood(youMii, 'neutral');
     } else {
-      bubble.setAttribute('position', '0 1.15 0.55');
-      MiiCharacter.setSpeaking(youMii, true);
+      // Player (first-person) - bubble on the near side
+      bubble.setAttribute('position', '0 1.15 0.4');
       MiiCharacter.setSpeaking(alexMii, false);
     }
 
@@ -177,12 +169,14 @@ const SceneRenderer = (() => {
   function showPlayerChoice(text) {
     const bubble = document.getElementById('speech-bubble');
     const bubbleText = document.getElementById('bubble-text');
-    bubble.setAttribute('position', '0 1.15 0.55');
+    bubble.setAttribute('position', '0 1.15 0.4');
     bubble.setAttribute('visible', 'true');
     if (bubbleText) bubbleText.setAttribute('value', text);
-    MiiCharacter.setSpeaking(youMii, true);
+    const speakerName = document.getElementById('speaker-name');
+    const speakerRole = document.getElementById('speaker-role');
+    if (speakerName) speakerName.textContent = 'You';
+    if (speakerRole) speakerRole.textContent = '';
     MiiCharacter.setSpeaking(alexMii, false);
-    MiiCharacter.setMood(youMii, 'happy');
   }
 
   function setVisible(visible) {
@@ -194,7 +188,6 @@ const SceneRenderer = (() => {
     showDialogue,
     showPlayerChoice,
     setVisible,
-    getAlex: () => alexMii,
-    getYou: () => youMii
+    getAlex: () => alexMii
   };
 })();

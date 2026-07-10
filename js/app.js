@@ -101,8 +101,9 @@
     SceneRenderer.setVisible(true);
 
     const camera = $('#camera');
-    camera.setAttribute('position', '0 1.45 1.6');
-    camera.setAttribute('rotation', '-8 0 0');
+    // First-person view: player sitting at the table
+    camera.setAttribute('position', '0 1.4 0.9');
+    camera.setAttribute('rotation', '-5 0 0');
     camera.setAttribute('look-controls', 'enabled: true');
 
     rapport = 50;
