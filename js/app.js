@@ -15,6 +15,65 @@
     $('#btn-restart')?.addEventListener('click', restart);
   }
 
+  function playIntroSong() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      const ctx = new AudioCtx();
+
+      const resumeAndPlay = () => {
+        const now = ctx.currentTime;
+
+        const playNote = (freq, offset, dur, type = 'triangle', volume = 0.22) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const filter = ctx.createBiquadFilter();
+
+          osc.type = type;
+          osc.frequency.value = freq;
+          filter.type = 'lowpass';
+          filter.frequency.value = 1600;
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+
+          const startTime = now + offset;
+          osc.start(startTime);
+          gain.gain.value = volume;
+          gain.gain.linearRampToValueAtTime(0.001, startTime + dur + 0.1);
+
+          setTimeout(() => {
+            try { osc.stop(); } catch (e) {}
+          }, (offset + dur + 0.2) * 1000);
+        };
+
+        // fun, light-hearted intro jingle (schedules from currentTime)
+        playNote(523, 0.00, 0.16);
+        playNote(659, 0.18, 0.16);
+        playNote(784, 0.36, 0.16);
+        playNote(1046, 0.54, 0.32);
+
+        playNote(880, 0.95, 0.13);
+        playNote(988, 1.10, 0.13);
+        playNote(1046, 1.26, 0.38);
+
+        // soft bass
+        playNote(262, 0.00, 0.55, 'sine', 0.09);
+        playNote(392, 0.65, 0.45, 'sine', 0.08);
+      };
+
+      if (ctx.state === 'suspended') {
+        ctx.resume().then(resumeAndPlay).catch(() => {});
+      } else {
+        resumeAndPlay();
+      }
+    } catch (e) {
+      // audio not supported or blocked, skip silently
+    }
+  }
+
   function start() {
     $('#landing').classList.remove('active');
     $('#scene-container').classList.add('active');
@@ -33,6 +92,9 @@
 
     updateMeters();
     loadNode(currentNode);
+
+    // play a fun intro song when the experience begins
+    playIntroSong();
 
     window.dispatchEvent(new Event('resize'));
   }

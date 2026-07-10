@@ -6,6 +6,45 @@ const MiiCharacter = (() => {
     return el;
   }
 
+  function createHand(skin, isLeft = false) {
+    const group = document.createElement('a-entity');
+
+    // palm
+    const palm = part('a-sphere', {
+      radius: 0.029, color: skin, position: '0 0 0'
+    });
+    group.appendChild(palm);
+
+    const sign = isLeft ? -1 : 1;
+
+    // 4 fingers
+    for (let i = 0; i < 4; i++) {
+      const spread = (i - 1.5) * 0.015;
+      const finger = part('a-cylinder', {
+        radius: 0.006,
+        height: 0.05,
+        color: skin,
+        position: `${spread * sign} 0.038 ${0.004}`,
+        rotation: '0 0 0'
+      });
+      finger.setAttribute('class', 'finger');
+      group.appendChild(finger);
+    }
+
+    // thumb
+    const thumb = part('a-cylinder', {
+      radius: 0.0065,
+      height: 0.035,
+      color: skin,
+      position: `${0.028 * sign} 0.01 0.003`,
+      rotation: `0 0 ${isLeft ? '42' : '-42'}`
+    });
+    thumb.setAttribute('class', 'finger');
+    group.appendChild(thumb);
+
+    return group;
+  }
+
   function create(config = {}) {
     const {
       skin = '#F5CBA7',
@@ -44,14 +83,17 @@ const MiiCharacter = (() => {
     rightArm.setAttribute('id', 'right-arm');
     body.appendChild(rightArm);
 
-    const leftHand = part('a-sphere', {
-      radius: 0.04, color: skin, position: '-0.18 0.06 0'
-    });
+    const leftHand = createHand(skin, true);
+    leftHand.setAttribute('position', '-0.195 0.04 0');
+    leftHand.setAttribute('id', 'left-hand');
+    // subtle idle movement on hands (appendages)
+    leftHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2100; loop: true; to: 0 0 6; easing: easeInOutSine');
     body.appendChild(leftHand);
 
-    const rightHand = part('a-sphere', {
-      radius: 0.04, color: skin, position: '0.18 0.06 0'
-    });
+    const rightHand = createHand(skin, false);
+    rightHand.setAttribute('position', '0.195 0.04 0');
+    rightHand.setAttribute('id', 'right-hand');
+    rightHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2400; loop: true; to: 0 0 -7; easing: easeInOutSine');
     body.appendChild(rightHand);
 
     const headGroup = document.createElement('a-entity');
@@ -166,13 +208,39 @@ const MiiCharacter = (() => {
       }
       const rightArm = character.querySelector('#right-arm');
       if (rightArm) {
-        rightArm.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 600; loop: true; to: 0 0 -35');
+        rightArm.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 550; loop: true; to: 0 0 -32');
       }
+      const leftArm = character.querySelector('#left-arm');
+      if (leftArm) {
+        leftArm.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 850; loop: true; to: 0 0 14');
+      }
+
+      // moving fingers + hand lift = more human appendages!
+      const hand = character.querySelector('#right-hand');
+      if (hand) {
+        hand.setAttribute('animation__hand', 'property: position; dir: alternate; dur: 420; loop: true; to: 0.008 0.012 0.015; easing: easeInOutSine');
+      }
+      const fingers = character.querySelectorAll('.finger');
+      fingers.forEach((f, i) => {
+        const rotAmt = (i % 2 === 0) ? 16 : -16;
+        f.setAttribute('animation__finger', `property: rotation; dir: alternate; dur: 240; loop: true; to: 0 0 ${rotAmt}; delay: ${i * 30}; easing: easeInOutSine`);
+      });
     } else {
       head.removeAttribute('animation__talk');
       if (mouth) mouth.removeAttribute('animation__talk');
       const rightArm = character.querySelector('#right-arm');
       if (rightArm) rightArm.removeAttribute('animation__gesture');
+      const leftArm = character.querySelector('#left-arm');
+      if (leftArm) leftArm.removeAttribute('animation__gesture');
+
+      const hand = character.querySelector('#right-hand');
+      if (hand) hand.removeAttribute('animation__hand');
+
+      const fingers = character.querySelectorAll('.finger');
+      fingers.forEach(f => {
+        f.removeAttribute('animation__finger');
+        f.setAttribute('rotation', '0 0 0');
+      });
     }
   }
 
