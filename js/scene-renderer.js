@@ -87,11 +87,11 @@ const SceneRenderer = (() => {
     // youMii = MiiCharacter.create({ ...CHARACTERS.you, scale: 1, model: 'models/you.glb' });
     // First-person: only show Alex (the manager). Player is implied at the table.
     // alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1, model: 'models/alex.glb' });
-    alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1.1 });
-    alexMii.setAttribute('position', '0 0 -1.2');
-    alexMii.setAttribute('rotation', '0 0 0');
+    alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 0.85 });
+    // Position Alex to the right side of the table from first-person view
+    alexMii.setAttribute('position', '0.8 0 -0.6');
+    alexMii.setAttribute('rotation', '0 -30 0');
     room.appendChild(alexMii);
-    MiiCharacter.startBlinking(alexMii);
 
     const speechBubble = document.createElement('a-entity');
     speechBubble.setAttribute('id', 'speech-bubble');
@@ -151,7 +151,7 @@ const SceneRenderer = (() => {
     }
 
     if (speaker === 'alex') {
-      bubble.setAttribute('position', '0 1.35 -1.0');
+      bubble.setAttribute('position', '0.8 1.25 -0.4');
       bubble.setAttribute('visible', 'true');
       MiiCharacter.setSpeaking(alexMii, true);
       MiiCharacter.setMood(alexMii, node.mood || 'neutral');

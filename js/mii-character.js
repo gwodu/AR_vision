@@ -107,49 +107,29 @@ const MiiCharacter = (() => {
     });
     body.appendChild(tie);
 
-    // Full arms with elbows (upper + forearm)
-    // Left upper arm
-    const leftUpperArm = part('a-cylinder', {
-      radius: 0.04, height: 0.28, color: shirt,
-      position: '-0.18 1.05 0', rotation: '0 0 25'
+    // Arms - single cylinder for simplicity, positioned for full body
+    const leftArm = part('a-cylinder', {
+      radius: 0.04, height: 0.45, color: shirt,
+      position: '-0.20 0.95 0', rotation: '0 0 30'
     });
-    leftUpperArm.setAttribute('id', 'left-upper-arm');
-    body.appendChild(leftUpperArm);
-
-    // Left forearm
-    const leftForearm = part('a-cylinder', {
-      radius: 0.035, height: 0.26, color: shirt,
-      position: '-0.26 0.78 0', rotation: '0 0 10'
-    });
-    leftForearm.setAttribute('id', 'left-forearm');
-    body.appendChild(leftForearm);
+    leftArm.setAttribute('id', 'left-arm');
+    body.appendChild(leftArm);
 
     const leftHand = createHand(skin, true);
-    leftHand.setAttribute('position', '-0.30 0.55 0');
+    leftHand.setAttribute('position', '-0.32 0.55 0');
     leftHand.setAttribute('id', 'left-hand');
-    leftHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2100; loop: true; to: 0 0 8; easing: easeInOutSine');
     body.appendChild(leftHand);
 
-    // Right upper arm
-    const rightUpperArm = part('a-cylinder', {
-      radius: 0.04, height: 0.28, color: shirt,
-      position: '0.18 1.05 0', rotation: '0 0 -25'
+    const rightArm = part('a-cylinder', {
+      radius: 0.04, height: 0.45, color: shirt,
+      position: '0.20 0.95 0', rotation: '0 0 -30'
     });
-    rightUpperArm.setAttribute('id', 'right-upper-arm');
-    body.appendChild(rightUpperArm);
-
-    // Right forearm
-    const rightForearm = part('a-cylinder', {
-      radius: 0.035, height: 0.26, color: shirt,
-      position: '0.26 0.78 0', rotation: '0 0 -10'
-    });
-    rightForearm.setAttribute('id', 'right-forearm');
-    body.appendChild(rightForearm);
+    rightArm.setAttribute('id', 'right-arm');
+    body.appendChild(rightArm);
 
     const rightHand = createHand(skin, false);
-    rightHand.setAttribute('position', '0.30 0.55 0');
+    rightHand.setAttribute('position', '0.32 0.55 0');
     rightHand.setAttribute('id', 'right-hand');
-    rightHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2400; loop: true; to: 0 0 -8; easing: easeInOutSine');
     body.appendChild(rightHand);
 
     // Full legs
@@ -300,11 +280,6 @@ const MiiCharacter = (() => {
 
     root.appendChild(body);
 
-    root.setAttribute('animation__idle', 'property: position; dir: alternate; dur: 1800; loop: true; to: 0 0.02 0; easing: easeInOutSine');
-
-    // Breathing - subtle human life
-    body.setAttribute('animation__breathe', 'property: scale; dir: alternate; dur: 3200; loop: true; to: 1 1.02 1; easing: easeInOutSine');
-
     const nameTag = document.createElement('a-text');
     nameTag.setAttribute('value', name);
     nameTag.setAttribute('align', 'center');
@@ -359,22 +334,13 @@ const MiiCharacter = (() => {
         mouth.setAttribute('animation__talk', 'property: scale; dir: alternate; dur: 280; loop: true; to: 1.2 1.7 1');
       }
       // More natural gesturing - right hand more active
-      // Animate upper arms and forearms for more natural human movement
-      const rightUpper = character.querySelector('#right-upper-arm');
-      if (rightUpper) {
-        rightUpper.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 480; loop: true; to: 8 0 -50');
+      const rightArm = character.querySelector('#right-arm');
+      if (rightArm) {
+        rightArm.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 480; loop: true; to: 0 0 -45');
       }
-      const rightFore = character.querySelector('#right-forearm');
-      if (rightFore) {
-        rightFore.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 420; loop: true; to: -5 0 -25');
-      }
-      const leftUpper = character.querySelector('#left-upper-arm');
-      if (leftUpper) {
-        leftUpper.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 720; loop: true; to: -5 0 22');
-      }
-      const leftFore = character.querySelector('#left-forearm');
-      if (leftFore) {
-        leftFore.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 650; loop: true; to: 4 0 15');
+      const leftArm = character.querySelector('#left-arm');
+      if (leftArm) {
+        leftArm.setAttribute('animation__gesture', 'property: rotation; dir: alternate; dur: 720; loop: true; to: 0 0 20');
       }
 
       // moving fingers + hand lift = more human appendages!
@@ -390,14 +356,10 @@ const MiiCharacter = (() => {
     } else {
       head.removeAttribute('animation__talk');
       if (mouth) mouth.removeAttribute('animation__talk');
-      const rightUpper = character.querySelector('#right-upper-arm');
-      if (rightUpper) rightUpper.removeAttribute('animation__gesture');
-      const rightFore = character.querySelector('#right-forearm');
-      if (rightFore) rightFore.removeAttribute('animation__gesture');
-      const leftUpper = character.querySelector('#left-upper-arm');
-      if (leftUpper) leftUpper.removeAttribute('animation__gesture');
-      const leftFore = character.querySelector('#left-forearm');
-      if (leftFore) leftFore.removeAttribute('animation__gesture');
+      const rightArm = character.querySelector('#right-arm');
+      if (rightArm) rightArm.removeAttribute('animation__gesture');
+      const leftArm = character.querySelector('#left-arm');
+      if (leftArm) leftArm.removeAttribute('animation__gesture');
 
       const hand = character.querySelector('#right-hand');
       if (hand) hand.removeAttribute('animation__hand');

@@ -103,7 +103,7 @@
     const camera = $('#camera');
     // First-person view: player sitting at the table
     camera.setAttribute('position', '0 1.4 0.9');
-    camera.setAttribute('rotation', '-5 0 0');
+    camera.setAttribute('rotation', '-5 -20 0');
     camera.setAttribute('look-controls', 'enabled: true');
 
     rapport = 50;
