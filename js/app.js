@@ -18,63 +18,82 @@
   function playIntroSong() {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
+      if (!AudioCtx) {
+        console.log('[audio] Web Audio not supported');
+        return;
+      }
 
       const ctx = new AudioCtx();
 
-      const resumeAndPlay = () => {
-        const now = ctx.currentTime;
+      // Helper to play a note with decent volume
+      const playNote = (freq, startDelay, duration, wave = 'triangle', vol = 0.45) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
 
-        const playNote = (freq, offset, dur, type = 'triangle', volume = 0.22) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const filter = ctx.createBiquadFilter();
+        osc.type = wave;
+        osc.frequency.value = freq;
 
-          osc.type = type;
-          osc.frequency.value = freq;
-          filter.type = 'lowpass';
-          filter.frequency.value = 1600;
+        filter.type = 'lowpass';
+        filter.frequency.value = 2200;
 
-          osc.connect(filter);
-          filter.connect(gain);
-          gain.connect(ctx.destination);
+        const masterGain = ctx.createGain();
+        masterGain.gain.value = vol;
 
-          const startTime = now + offset;
-          osc.start(startTime);
-          gain.gain.value = volume;
-          gain.gain.linearRampToValueAtTime(0.001, startTime + dur + 0.1);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+        masterGain.connect(ctx.destination);
 
-          setTimeout(() => {
-            try { osc.stop(); } catch (e) {}
-          }, (offset + dur + 0.2) * 1000);
-        };
+        const t = ctx.currentTime + startDelay;
+        osc.start(t);
 
-        // fun, light-hearted intro jingle (schedules from currentTime)
-        playNote(523, 0.00, 0.16);
-        playNote(659, 0.18, 0.16);
-        playNote(784, 0.36, 0.16);
-        playNote(1046, 0.54, 0.32);
+        // quick attack + decay
+        gain.gain.value = vol * 0.1;
+        gain.gain.linearRampToValueAtTime(vol, t + 0.02);
+        gain.gain.linearRampToValueAtTime(0.001, t + duration);
 
-        playNote(880, 0.95, 0.13);
-        playNote(988, 1.10, 0.13);
-        playNote(1046, 1.26, 0.38);
+        setTimeout(() => {
+          try { osc.stop(); } catch (e) {}
+        }, (startDelay + duration + 0.3) * 1000);
+      };
 
-        // soft bass
-        playNote(262, 0.00, 0.55, 'sine', 0.09);
-        playNote(392, 0.65, 0.45, 'sine', 0.08);
+      // Make sure context is running (required after user gesture)
+      const startPlaying = () => {
+        // A short primer note to unlock audio on some browsers
+        playNote(880, 0.0, 0.08, 'sine', 0.3);
+
+        // Main fun upbeat jingle (higher volume)
+        playNote(523.25, 0.12, 0.18, 'triangle', 0.55); // C5
+        playNote(659.25, 0.30, 0.18, 'triangle', 0.55); // E5
+        playNote(783.99, 0.48, 0.18, 'triangle', 0.55); // G5
+        playNote(1046.50, 0.66, 0.38, 'triangle', 0.65); // C6
+
+        playNote(880.00, 1.12, 0.15, 'triangle', 0.5);  // A5
+        playNote(987.77, 1.27, 0.15, 'triangle', 0.5);  // B5
+        playNote(1046.50, 1.43, 0.45, 'triangle', 0.6); // C6
+
+        // Bass line for fullness
+        playNote(261.63, 0.10, 0.6, 'sine', 0.28);  // C4
+        playNote(392.00, 0.75, 0.5, 'sine', 0.25);  // G4
       };
 
       if (ctx.state === 'suspended') {
-        ctx.resume().then(resumeAndPlay).catch(() => {});
+        ctx.resume()
+          .then(startPlaying)
+          .catch(err => console.log('[audio] resume failed', err));
       } else {
-        resumeAndPlay();
+        startPlaying();
       }
     } catch (e) {
-      // audio not supported or blocked, skip silently
+      console.log('[audio] error playing intro', e);
     }
   }
 
   function start() {
+    // Play intro song immediately on user gesture (click)
+    playIntroSong();
+
     $('#landing').classList.remove('active');
     $('#scene-container').classList.add('active');
 
@@ -92,9 +111,6 @@
 
     updateMeters();
     loadNode(currentNode);
-
-    // play a fun intro song when the experience begins
-    playIntroSong();
 
     window.dispatchEvent(new Event('resize'));
   }
