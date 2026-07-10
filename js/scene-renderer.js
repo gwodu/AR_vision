@@ -86,28 +86,43 @@ const SceneRenderer = (() => {
     // Real glTF model is used below (see important note about adding the file).
 
     // Load the Business Man model: https://poly.pizza/m/JFrLIKqvCH
+    // The page shows multiple poses because this GLB contains several animation clips.
+    // We use animation-mixer and auto-pick the best "idle" clip for standing still
+    // and the best "interact/talk" clip as reaction when Alex speaks.
     // 
-    // IMPORTANT: The .glb file is NOT in this repo yet.
-    // You must download it yourself and add it (see instructions below).
-    //
-    // Steps to include it in GitHub:
-    // 1. Go to the link above
-    // 2. Download the GLTF/GLB version
-    // 3. Place it as: models/business-man.glb
-    // 4. git add models/business-man.glb
-    // 5. git commit && git push
-    //
-    // This is why it wasn't automatically "part of the folder" — the binary asset has to be downloaded and committed by you.
+    // Check browser console (F12) after load — it will log available clips and what we picked.
+    // The model file must be at models/business-man.glb (download from the link).
     alexMii = document.createElement('a-entity');
     alexMii.setAttribute('gltf-model', 'models/business-man.glb');
     alexMii.setAttribute('scale', '0.85 0.85 0.85');
     alexMii.setAttribute('position', '0.8 0 -0.6');
     alexMii.setAttribute('rotation', '0 -30 0');
+
+    // Debug + control animations after load
+    alexMii.addEventListener('model-loaded', () => {
+      const mesh = alexMii.getObject3D('mesh');
+      if (mesh && mesh.animations && mesh.animations.length > 0) {
+        const clipNames = mesh.animations.map(a => a.name);
+        console.log('Available animation clips in business-man.glb:', clipNames);
+
+        // Automatically pick a good idle/stand clip
+        let idleClip = mesh.animations.find(a =>
+          /idle|stand|pose|rest/i.test(a.name)
+        ) || mesh.animations[0];
+
+        alexMii.setAttribute('animation-mixer', `clip: ${idleClip.name}; loop: repeat`);
+        console.log('Using idle clip for standing still:', idleClip.name);
+      } else {
+        console.log('This GLB appears to have no animation clips (static pose).');
+      }
+    });
+
     room.appendChild(alexMii);
 
     const speechBubble = document.createElement('a-entity');
     speechBubble.setAttribute('id', 'speech-bubble');
     speechBubble.setAttribute('position', '0.3 1.25 -0.5');
+    speechBubble.setAttribute('visible', 'false');
 
     const bubbleBg = document.createElement('a-plane');
     bubbleBg.setAttribute('width', 1.1);
@@ -167,20 +182,48 @@ const SceneRenderer = (() => {
       bubble.setAttribute('visible', 'true');
       MiiCharacter.setSpeaking(alexMii, true);
 
-      // Simple talking animation for the glTF model (head nod)
-      if (alexMii && alexMii.getAttribute('gltf-model')) {
-        alexMii.removeAttribute('animation__talk');
-        alexMii.setAttribute('animation__talk', 'property: rotation; dur: 350; dir: alternate; loop: true; to: -27 -27 2; easing: easeInOutSine');
+      // Play reaction animation when Alex speaks (in response to your choice)
+      if (alexMii && alexMii.getAttribute('gltf-model') && alexMii.components['animation-mixer']) {
+        const mesh = alexMii.getObject3D('mesh');
+        let reactionClip = null;
+        if (mesh && mesh.animations && mesh.animations.length > 0) {
+          reactionClip = mesh.animations.find(a =>
+            /interact|talk|wave|nod|gesture|response/i.test(a.name)
+          );
+        }
+        const clipToPlay = reactionClip ? reactionClip.name : 'interact';
+        alexMii.setAttribute('animation-mixer', `clip: ${clipToPlay}; loop: once`);
+
+        // Return to the idle clip after reaction
+        setTimeout(() => {
+          if (alexMii && alexMii.components['animation-mixer']) {
+            const idleMesh = alexMii.getObject3D('mesh');
+            let idleC = null;
+            if (idleMesh && idleMesh.animations && idleMesh.animations.length > 0) {
+              idleC = idleMesh.animations.find(a =>
+                /idle|stand|pose|rest/i.test(a.name)
+              );
+            }
+            const idleName = idleC ? idleC.name : 'idle';
+            alexMii.setAttribute('animation-mixer', `clip: ${idleName}; loop: repeat`);
+          }
+        }, 2500);
       }
 
       MiiCharacter.setMood(alexMii, node.mood || 'neutral');
     } else {
-      // Player (first-person) - bubble on the near side
-      bubble.setAttribute('position', '0 1.15 0.4');
+      // Player side - no 3D bubble for player speech
+      if (bubble) bubble.setAttribute('visible', 'false');
       MiiCharacter.setSpeaking(alexMii, false);
 
       if (alexMii && alexMii.getAttribute('gltf-model')) {
-        alexMii.removeAttribute('animation__talk');
+        if (alexMii.components['animation-mixer']) {
+          const m = alexMii.getObject3D('mesh');
+          let idle = null;
+          if (m && m.animations) idle = m.animations.find(a => /idle|stand|pose|rest/i.test(a.name));
+          const name = idle ? idle.name : 'idle';
+          alexMii.setAttribute('animation-mixer', `clip: ${name}; loop: repeat`);
+        }
       }
     }
 
@@ -190,19 +233,24 @@ const SceneRenderer = (() => {
   }
 
   function showPlayerChoice(text) {
+    // No 3D text bubble for the player's spoken choice anymore
     const bubble = document.getElementById('speech-bubble');
-    const bubbleText = document.getElementById('bubble-text');
-    bubble.setAttribute('position', '0 1.15 0.4');
-    bubble.setAttribute('visible', 'true');
-    if (bubbleText) bubbleText.setAttribute('value', text);
+    if (bubble) bubble.setAttribute('visible', 'false');
+
     const speakerName = document.getElementById('speaker-name');
     const speakerRole = document.getElementById('speaker-role');
     if (speakerName) speakerName.textContent = 'You';
     if (speakerRole) speakerRole.textContent = '';
-    MiiCharacter.setSpeaking(alexMii, false);
 
+    // Make sure Alex is not doing any talk anim
     if (alexMii && alexMii.getAttribute('gltf-model')) {
-      alexMii.removeAttribute('animation__talk');
+      if (alexMii.components['animation-mixer']) {
+        const m = alexMii.getObject3D('mesh');
+        let idle = null;
+        if (m && m.animations) idle = m.animations.find(a => /idle|stand|pose|rest/i.test(a.name));
+        const name = idle ? idle.name : 'idle';
+        alexMii.setAttribute('animation-mixer', `clip: ${name}; loop: repeat`);
+      }
     }
   }
 
