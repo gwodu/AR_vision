@@ -9,34 +9,34 @@ const MiiCharacter = (() => {
   function createHand(skin, isLeft = false) {
     const group = document.createElement('a-entity');
 
-    // palm
+    // palm (the circular ball should be "above" / closer to the arm than the fingers)
     const palm = part('a-sphere', {
-      radius: 0.029, color: skin, position: '0 0 0'
+      radius: 0.029, color: skin, position: '0 0.015 0'
     });
     group.appendChild(palm);
 
     const sign = isLeft ? -1 : 1;
 
-    // 4 fingers
+    // 4 fingers - positioned below the palm (negative y)
     for (let i = 0; i < 4; i++) {
       const spread = (i - 1.5) * 0.015;
       const finger = part('a-cylinder', {
         radius: 0.006,
         height: 0.05,
         color: skin,
-        position: `${spread * sign} 0.038 ${0.004}`,
+        position: `${spread * sign} -0.028 ${0.004}`,
         rotation: '0 0 0'
       });
       finger.setAttribute('class', 'finger');
       group.appendChild(finger);
     }
 
-    // thumb
+    // thumb - also below / angled
     const thumb = part('a-cylinder', {
       radius: 0.0065,
       height: 0.035,
       color: skin,
-      position: `${0.028 * sign} 0.01 0.003`,
+      position: `${0.028 * sign} -0.008 0.003`,
       rotation: `0 0 ${isLeft ? '42' : '-42'}`
     });
     thumb.setAttribute('class', 'finger');
@@ -84,14 +84,14 @@ const MiiCharacter = (() => {
     body.appendChild(rightArm);
 
     const leftHand = createHand(skin, true);
-    leftHand.setAttribute('position', '-0.195 0.04 0');
+    leftHand.setAttribute('position', '-0.195 0.06 0');
     leftHand.setAttribute('id', 'left-hand');
     // subtle idle movement on hands (appendages)
     leftHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2100; loop: true; to: 0 0 6; easing: easeInOutSine');
     body.appendChild(leftHand);
 
     const rightHand = createHand(skin, false);
-    rightHand.setAttribute('position', '0.195 0.04 0');
+    rightHand.setAttribute('position', '0.195 0.06 0');
     rightHand.setAttribute('id', 'right-hand');
     rightHand.setAttribute('animation__sway', 'property: rotation; dir: alternate; dur: 2400; loop: true; to: 0 0 -7; easing: easeInOutSine');
     body.appendChild(rightHand);
