@@ -107,7 +107,7 @@ const SceneRenderer = (() => {
 
     const speechBubble = document.createElement('a-entity');
     speechBubble.setAttribute('id', 'speech-bubble');
-    speechBubble.setAttribute('position', '0.8 1.25 -0.4');
+    speechBubble.setAttribute('position', '0.3 1.25 -0.5');
 
     const bubbleBg = document.createElement('a-plane');
     bubbleBg.setAttribute('width', 1.1);
@@ -163,7 +163,7 @@ const SceneRenderer = (() => {
     }
 
     if (speaker === 'alex') {
-      bubble.setAttribute('position', '0.8 1.25 -0.4');
+      bubble.setAttribute('position', '0.3 1.25 -0.5');
       bubble.setAttribute('visible', 'true');
       MiiCharacter.setSpeaking(alexMii, true);
 
