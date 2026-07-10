@@ -84,15 +84,20 @@ const SceneRenderer = (() => {
     window.setAttribute('material', 'shader: flat; opacity: 0.55; transparent: true');
     room.appendChild(window);
 
+    // You can import real human models like this:
+    // youMii = MiiCharacter.create({ ...CHARACTERS.you, scale: 1, model: 'models/you.glb' });
     youMii = MiiCharacter.create({ ...CHARACTERS.you, scale: 1 });
     youMii.setAttribute('position', '0 0 0.55');
     youMii.setAttribute('rotation', '0 180 0');
     room.appendChild(youMii);
+    MiiCharacter.startBlinking(youMii);
 
+    // alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1, model: 'models/alex.glb' });
     alexMii = MiiCharacter.create({ ...CHARACTERS.alex, scale: 1 });
     alexMii.setAttribute('position', '0 0 -0.55');
     alexMii.setAttribute('rotation', '0 0 0');
     room.appendChild(alexMii);
+    MiiCharacter.startBlinking(alexMii);
 
     const speechBubble = document.createElement('a-entity');
     speechBubble.setAttribute('id', 'speech-bubble');

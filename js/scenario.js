@@ -8,6 +8,8 @@ const CHARACTERS = {
     pants: '#1E3A2F',
     hair: '#1a1a1a',
     hairStyle: 'short'
+    // To use a real imported human model instead of procedural:
+    // model: 'models/you.glb'
   },
   alex: {
     id: 'alex',
@@ -18,6 +20,7 @@ const CHARACTERS = {
     pants: '#2D3436',
     hair: '#4A3728',
     hairStyle: 'bob'
+    // model: 'models/alex.glb'
   }
 };
 

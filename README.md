@@ -1,6 +1,8 @@
 # NegotiateAR
 
-Practice salary negotiation face-to-face with Wii-style 3D characters in your browser. Choose dialogue options, track rapport and assertiveness, and work toward the best deal.
+Practice salary negotiation face-to-face with expressive 3D characters in your browser. Choose your words carefully, read the room through body language and expressions, and work toward the best deal.
+
+The characters are built procedurally from simple shapes. This keeps the experience lightweight, fast-loading, and reliable — especially good for WebAR on mobile. You can optionally swap in real glTF human models (see below).
 
 ## What's in the demo
 
@@ -69,6 +71,31 @@ AR_vision/
 
 ## Tech
 
-- [A-Frame 1.5](https://aframe.io/) + WebXR
-- Procedural geometry (no external 3D models)
+- [A-Frame 1.8](https://aframe.io/) + WebXR
+- Procedural characters (easy to animate, zero assets)
+- Optional: real glTF/GLB human models (see js/mii-character.js and js/scenario.js)
 - Static site — no build step
+
+## Using better human models
+
+The current characters are built from basic shapes for performance and simplicity in WebAR.
+
+You can replace them with proper human models:
+
+1. Download a .glb (glTF binary) file (low-poly recommended for mobile).
+2. Put it in a `models/` folder (e.g. `models/you.glb`).
+3. In `js/scenario.js`, uncomment and set the `model` property on the character:
+   ```js
+   you: {
+     ...
+     model: 'models/you.glb'
+   }
+   ```
+4. The model will be loaded via A-Frame's gltf-model.
+
+Good free sources:
+- Sketchfab (search "human gltf", filter license)
+- Mixamo (rigged characters)
+- Kenney or other free asset sites
+
+Note: Complex models can impact performance on phones in AR. Procedural shapes are often the "best" choice for reliable WebAR experiences.
