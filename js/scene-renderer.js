@@ -182,33 +182,8 @@ const SceneRenderer = (() => {
       bubble.setAttribute('visible', 'true');
       MiiCharacter.setSpeaking(alexMii, true);
 
-      // Play reaction animation when Alex speaks (in response to your choice)
-      if (alexMii && alexMii.getAttribute('gltf-model') && alexMii.components['animation-mixer']) {
-        const mesh = alexMii.getObject3D('mesh');
-        let reactionClip = null;
-        if (mesh && mesh.animations && mesh.animations.length > 0) {
-          reactionClip = mesh.animations.find(a =>
-            /interact|talk|wave|nod|gesture|response/i.test(a.name)
-          );
-        }
-        const clipToPlay = reactionClip ? reactionClip.name : 'interact';
-        alexMii.setAttribute('animation-mixer', `clip: ${clipToPlay}; loop: once`);
-
-        // Return to the idle clip after reaction
-        setTimeout(() => {
-          if (alexMii && alexMii.components['animation-mixer']) {
-            const idleMesh = alexMii.getObject3D('mesh');
-            let idleC = null;
-            if (idleMesh && idleMesh.animations && idleMesh.animations.length > 0) {
-              idleC = idleMesh.animations.find(a =>
-                /idle|stand|pose|rest/i.test(a.name)
-              );
-            }
-            const idleName = idleC ? idleC.name : 'idle';
-            alexMii.setAttribute('animation-mixer', `clip: ${idleName}; loop: repeat`);
-          }
-        }, 2500);
-      }
+      // Note: interact reaction is triggered right after the user picks a choice
+      // (see showPlayerChoice). No need to set it here again.
 
       MiiCharacter.setMood(alexMii, node.mood || 'neutral');
     } else {
@@ -242,14 +217,24 @@ const SceneRenderer = (() => {
     if (speakerName) speakerName.textContent = 'You';
     if (speakerRole) speakerRole.textContent = '';
 
-    // Make sure Alex is not doing any talk anim
+    // After user decision, play interact animation as reaction to the choice
     if (alexMii && alexMii.getAttribute('gltf-model')) {
       if (alexMii.components['animation-mixer']) {
         const m = alexMii.getObject3D('mesh');
-        let idle = null;
-        if (m && m.animations) idle = m.animations.find(a => /idle|stand|pose|rest/i.test(a.name));
-        const name = idle ? idle.name : 'idle';
-        alexMii.setAttribute('animation-mixer', `clip: ${name}; loop: repeat`);
+        let reaction = null;
+        if (m && m.animations) reaction = m.animations.find(a => /interact|talk|wave|nod|gesture|response/i.test(a.name));
+        const name = reaction ? reaction.name : 'interact';
+        alexMii.setAttribute('animation-mixer', `clip: ${name}; loop: once`);
+        // Return to idle after the reaction
+        setTimeout(() => {
+          if (alexMii && alexMii.components['animation-mixer']) {
+            const idleM = alexMii.getObject3D('mesh');
+            let idleC = null;
+            if (idleM && idleM.animations) idleC = idleM.animations.find(a => /idle|stand|pose|rest/i.test(a.name));
+            const idleName = idleC ? idleC.name : 'idle';
+            alexMii.setAttribute('animation-mixer', `clip: ${idleName}; loop: repeat`);
+          }
+        }, 2500);
       }
     }
   }
