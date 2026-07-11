@@ -124,6 +124,8 @@
     // reset camera just in case
     const camera = $('#camera');
     camera.setAttribute('look-controls', 'enabled: false');
+
+    SceneRenderer.stopHandGestures && SceneRenderer.stopHandGestures();
   }
 
   function restart() {

@@ -115,6 +115,20 @@ const SceneRenderer = (() => {
       } else {
         console.log('This GLB appears to have no animation clips (static pose).');
       }
+
+      // Find bones for procedural hand gestures (in addition to baked clips)
+      const bones = {};
+      mesh.traverse(child => {
+        if (child.isBone) {
+          const n = child.name.toLowerCase();
+          if (n.includes('hand_l') || n.includes('left_hand')) bones.leftHand = child;
+          if (n.includes('hand_r') || n.includes('right_hand')) bones.rightHand = child;
+          if (n.includes('forearm_l') || n.includes('left_forearm')) bones.leftForeArm = child;
+          if (n.includes('forearm_r') || n.includes('right_forearm')) bones.rightForeArm = child;
+        }
+      });
+      alexMii.userData.bones = bones;
+      console.log('Found hand bones for gestures:', Object.keys(bones));
     });
 
     room.appendChild(alexMii);
@@ -168,6 +182,42 @@ const SceneRenderer = (() => {
     return leg;
   }
 
+  function startHandGestures() {
+    if (!alexMii || !alexMii.userData || !alexMii.userData.bones) return;
+    const bones = alexMii.userData.bones;
+    if (alexMii.userData.gestureInterval) clearInterval(alexMii.userData.gestureInterval);
+    let t = 0;
+    alexMii.userData.gestureInterval = setInterval(() => {
+      t += 0.25;
+      if (bones.leftHand) {
+        bones.leftHand.rotation.z = Math.sin(t) * 0.6 + 0.2;
+        bones.leftHand.rotation.x = Math.sin(t * 1.3) * 0.4;
+      }
+      if (bones.leftForeArm) {
+        bones.leftForeArm.rotation.x = Math.sin(t * 0.9) * 0.5 + 0.3;
+      }
+      if (bones.rightHand) {
+        bones.rightHand.rotation.z = Math.sin(t + 1.5) * -0.6 - 0.2;
+        bones.rightHand.rotation.x = Math.sin(t * 1.1) * 0.35;
+      }
+      if (bones.rightForeArm) {
+        bones.rightForeArm.rotation.x = Math.sin(t * 0.7) * 0.45 - 0.2;
+      }
+    }, 40);
+  }
+
+  function stopHandGestures() {
+    if (alexMii && alexMii.userData && alexMii.userData.gestureInterval) {
+      clearInterval(alexMii.userData.gestureInterval);
+      alexMii.userData.gestureInterval = null;
+      const bones = alexMii.userData.bones || {};
+      if (bones.leftHand) bones.leftHand.rotation.set(0, 0, 0);
+      if (bones.rightHand) bones.rightHand.rotation.set(0, 0, 0);
+      if (bones.leftForeArm) bones.leftForeArm.rotation.set(0, 0, 0);
+      if (bones.rightForeArm) bones.rightForeArm.rotation.set(0, 0, 0);
+    }
+  }
+
   function showDialogue(node) {
     const speaker = node.speaker;
     const bubble = document.getElementById('speech-bubble');
@@ -185,11 +235,15 @@ const SceneRenderer = (() => {
       // Note: interact reaction is triggered right after the user picks a choice
       // (see showPlayerChoice). No need to set it here again.
 
+      startHandGestures();
+
       MiiCharacter.setMood(alexMii, node.mood || 'neutral');
     } else {
       // Player side - no 3D bubble for player speech
       if (bubble) bubble.setAttribute('visible', 'false');
       MiiCharacter.setSpeaking(alexMii, false);
+
+      stopHandGestures();
 
       if (alexMii && alexMii.getAttribute('gltf-model')) {
         if (alexMii.components['animation-mixer']) {
@@ -237,6 +291,9 @@ const SceneRenderer = (() => {
         }, 2500);
       }
     }
+
+    // Add moving hand gestures after decision (will be stopped after reaction)
+    startHandGestures();
   }
 
   function setVisible(visible) {
@@ -248,6 +305,7 @@ const SceneRenderer = (() => {
     showDialogue,
     showPlayerChoice,
     setVisible,
-    getAlex: () => alexMii
+    getAlex: () => alexMii,
+    stopHandGestures: stopHandGestures
   };
 })();
